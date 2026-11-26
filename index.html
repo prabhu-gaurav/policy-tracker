@@ -56,6 +56,9 @@ main{max-width:1000px;margin:0 auto;padding:18px 16px 90px}
 .card h3{font-size:19px}
 .meta{color:var(--mute);font-size:13px;margin:0}
 .amt{font:600 22px Fraunces,serif;margin-top:2px}
+.money{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.money>div>small{display:block;font-size:12px;color:var(--mute);font-weight:500}
+.money .amt{font-size:20px;margin-top:0}
 .amt small{font:500 13px "Plus Jakarta Sans",sans-serif;color:var(--mute)}
 .dates{margin-top:6px;border-top:1px solid var(--line)}
 .d{display:grid;grid-template-columns:1fr auto;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -78,6 +81,7 @@ main{max-width:1000px;margin:0 auto;padding:18px 16px 90px}
 .ac input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sf);margin-bottom:10px}
 .ac .p,.ac .gg{width:100%;padding:11px}
 .ac .gg{margin-top:10px}
+.keep{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);margin:2px 0 12px;cursor:pointer}
 .lnk{background:none;border:none;color:var(--acc);padding:4px 0;font-size:13px}
 .err{color:var(--bad);font-size:13px;min-height:18px;margin:4px 0}
 .ok{color:var(--acc)}
@@ -104,6 +108,7 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
     <form id="af">
       <input id="em" type="email" placeholder="Email" autocomplete="email" required aria-label="Email">
       <input id="pw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" minlength="6" aria-label="Password">
+      <label class="keep"><input type="checkbox" id="keep" checked> Keep me signed in on this device</label>
       <button class="p" id="go" type="submit">Sign in</button>
     </form>
     <button class="gg" id="google" type="button">Continue with Google</button>
@@ -135,6 +140,12 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
   <button class="p fab" id="add">+ Add item</button>
 </div>
 
+<dialog id="idle">
+  <h2>Still there?</h2>
+  <p>For your security you will be signed out in <b id="idlesec">60</b> seconds.</p>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="p" id="stay" type="button">Stay signed in</button></div>
+</dialog>
+
 <dialog id="dlg">
   <form method="dialog" id="f">
     <h2 id="dt">Add item</h2>
@@ -146,6 +157,7 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
       <label>Policy / document no. <input id="num"></label>
     </div>
     <div data-k="insurance policy">
+      <label>Sum assured / total cover (₹) <input id="cover" type="number" min="0" step="any"></label>
       <div class="two">
         <label>Premium (₹) <input id="prem" type="number" min="0" step="any"></label>
         <label>Frequency
@@ -230,7 +242,8 @@ function render() {
   const dueSoon = items.filter(i => i.due && left(i.due) >= 0 && left(i.due) <= 30).reduce((s, i) => s + Number(i.prem || 0), 0);
   const expiring = items.filter(i => [i.exp, i.mat].some(d => d && left(d) >= 0 && left(d) <= 60)).length;
   const overdue = items.filter(i => events(i).some(e => left(e.d) < 0)).length;
-  $("sum").innerHTML = `<div class="stat"><b>${inr(dueSoon)}</b><span>premium due in the next 30 days</span></div><div class="stat"><b>${expiring}</b><span>expiring or maturing in 60 days</span></div><div class="stat ${overdue ? "late" : ""}"><b>${overdue}</b><span>past their date</span></div>`;
+  const totalCover = items.reduce((s, i) => s + Number(i.cover || 0), 0);
+  $("sum").innerHTML = `<div class="stat"><b>${inr(totalCover)}</b><span>total sum assured</span></div><div class="stat"><b>${inr(dueSoon)}</b><span>premium due in the next 30 days</span></div><div class="stat"><b>${expiring}</b><span>expiring or maturing in 60 days</span></div><div class="stat ${overdue ? "late" : ""}"><b>${overdue}</b><span>past their date</span></div>`;
 
   const alerts = items.flatMap(i => events(i).filter(e => left(e.d) <= Number(i.rem ?? 15)).map(e => `${esc(i.name)}: ${e.k.toLowerCase()} ${words(left(e.d))}`));
   $("banner").innerHTML = alerts.length ? `<div class="banner" role="status"><b>Needs attention</b><br>${alerts.join("<br>")}</div>` : "";
@@ -249,11 +262,12 @@ function render() {
       <div class="top"><span class="tag">${KIND[it.kind] || "Item"}</span><span class="pill ${st}">${events(it).length ? words(n) : "No dates"}</span></div>
       <h3>${esc(it.name)}</h3>
       <p class="meta">${esc([it.provider, it.number].filter(Boolean).join(" • ")) || "&nbsp;"}</p>
-      ${it.prem ? `<div class="amt">${inr(it.prem)} <small>/ ${PER[it.freq] ?? "year"}</small></div>` : ""}
+      ${it.cover || it.prem ? `<div class="money">${it.cover ? `<div><small>Sum assured</small><div class="amt">${inr(it.cover)}</div></div>` : ""}${it.prem ? `<div><small>${it.freq === "0" ? "Premium (one-time)" : "Premium / " + (PER[it.freq] ?? "year")}</small><div class="amt">${inr(it.prem)}</div></div>` : ""}</div>` : ""}
       <div class="dates">${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}</b><i>${words(m)}</i></div>`; }).join("")}</div>
       ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ""}
       <div class="acts">
         ${it.due && it.freq !== "0" ? `<button class="p" data-a="paid" data-id="${it.id}">Mark paid</button>` : ""}
+        ${it.dueHist?.length ? `<button data-a="undo" data-id="${it.id}" title="Go back to ${fmt(it.dueHist[it.dueHist.length - 1])}">Undo paid</button>` : ""}
         <button data-a="edit" data-id="${it.id}">Edit</button>
         <button class="d" data-a="del" data-id="${it.id}">Delete</button>
       </div></article>`;
@@ -263,7 +277,8 @@ function render() {
 $("list").onclick = async e => {
   const b = e.target.closest("button[data-a]"); if (!b) return;
   const it = items.find(x => x.id === b.dataset.id);
-  if (b.dataset.a === "paid") await store.put({ ...it, due: addMonths(it.due, Number(it.freq)) });
+  if (b.dataset.a === "paid") await store.put({ ...it, due: addMonths(it.due, Number(it.freq)), dueHist: [...(it.dueHist || []), it.due].slice(-20) });
+  if (b.dataset.a === "undo") { const h = [...(it.dueHist || [])], prev = h.pop(); if (prev) await store.put({ ...it, due: prev, dueHist: h }); }
   if (b.dataset.a === "edit") openForm(it);
   if (b.dataset.a === "del" && confirm(`Delete "${it.name}"?`)) await store.del(it);
 };
@@ -271,7 +286,7 @@ $("chips").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { fil
 $("q").oninput = e => { query = e.target.value; render(); };
 
 // ---- form
-const F = ["kind", "name", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
+const F = ["kind", "name", "cover", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
 const map = { prov: "provider", num: "number" };
 const key = id => map[id] || id;
 const showKinds = () => document.querySelectorAll("[data-k]").forEach(el => el.hidden = !el.dataset.k.split(" ").includes($("kind").value));
@@ -288,7 +303,8 @@ $("f").onsubmit = async e => {
   e.preventDefault();
   const it = { ...(editing || {}) };
   F.forEach(id => it[key(id)] = $(id).value);
-  if (it.kind === "document") { it.prem = ""; it.due = ""; it.mat = ""; }
+  if (editing && it.due !== editing.due) it.dueHist = [];
+  if (it.kind === "document") { it.dueHist = []; it.cover = ""; it.prem = ""; it.due = ""; it.mat = ""; }
   if (it.kind === "insurance") it.mat = "";
   if (it.kind === "policy") it.exp = "";
   $("save").disabled = true;
@@ -309,6 +325,21 @@ $("notif").onclick = async () => {
   if ("Notification" in window && await Notification.requestPermission() === "granted")
     items.forEach(it => events(it).forEach(e => { if (left(e.d) <= Number(it.rem ?? 15)) new Notification(it.name, { body: `${e.k} ${words(left(e.d))}` }); }));
 };
+
+// ---- inactivity timeout: sign out after IDLE_MIN minutes without activity, with a WARN_SEC warning first
+const IDLE_MIN = 15, WARN_SEC = 60;
+let last = Date.now(), idleTimer = null, notice = "";
+["mousemove", "keydown", "click", "touchstart", "scroll"].forEach(ev => addEventListener(ev, () => { if (!$("idle").open) last = Date.now(); }, { passive: true }));
+function startIdle() {
+  last = Date.now(); clearInterval(idleTimer);
+  idleTimer = setInterval(() => {
+    const idle = Date.now() - last, limit = IDLE_MIN * 60000;
+    if (idle >= limit) { notice = `You were signed out after ${IDLE_MIN} minutes of inactivity.`; fb.A.signOut(fb.auth); return; }
+    if (idle >= limit - WARN_SEC * 1000) { if (!$("idle").open) $("idle").showModal(); $("idlesec").textContent = Math.ceil((limit - idle) / 1000); }
+  }, 1000);
+}
+function stopIdle() { clearInterval(idleTimer); if ($("idle").open) $("idle").close(); }
+$("stay").onclick = () => { last = Date.now(); $("idle").close(); };
 
 // ---- auth and start
 let stop = () => {};
@@ -339,6 +370,9 @@ if (live) {
   const { A, auth } = fb;
   const msg = e => ({ "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account. Try signing in.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email address doesn't look right.", "auth/too-many-requests": "Too many attempts. Try again in a few minutes." }[e.code] || e.message.replace("Firebase: ", ""));
   const fail = e => { $("autherr").className = "err"; $("autherr").textContent = msg(e); };
+  // "Keep me signed in": remembered across browser restarts when ticked, otherwise only until the tab or window closes
+  const persist = () => A.setPersistence(auth, $("keep").checked ? A.browserLocalPersistence : A.browserSessionPersistence).catch(() => {});
+  persist(); $("keep").onchange = persist;
   $("af").onsubmit = e => { e.preventDefault(); (mode === "in" ? A.signInWithEmailAndPassword : A.createUserWithEmailAndPassword)(auth, $("em").value, $("pw").value).catch(fail); };
   $("google").onclick = () => A.signInWithPopup(auth, new A.GoogleAuthProvider()).catch(fail);
   $("forgot").onclick = () => {
@@ -346,7 +380,11 @@ if (live) {
     A.sendPasswordResetEmail(auth, $("em").value).then(() => { $("autherr").className = "err ok"; $("autherr").textContent = "Password reset email sent. Check your inbox."; }).catch(fail);
   };
   $("out").onclick = () => A.signOut(auth);
-  A.onAuthStateChanged(auth, u => { user = u; stop(); items = []; if (u) start(); else { $("app").hidden = true; $("auth").hidden = false; } });
+  A.onAuthStateChanged(auth, u => {
+    user = u; stop(); items = [];
+    if (u) { start(); startIdle(); }
+    else { stopIdle(); $("app").hidden = true; $("auth").hidden = false; $("autherr").className = "err"; $("autherr").textContent = notice; notice = ""; }
+  });
 } else start();
 </script>
 </body>
