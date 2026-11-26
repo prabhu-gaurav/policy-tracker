@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#16314f">
+<title>Policy &amp; Document Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f5;--sf:#fff;--ink:#142033;--mute:#5b6878;--line:#dde3ea;--brand:#16314f;--acc:#0e7c66;--accbg:#e3f4ef;--warn:#a65f00;--warnbg:#fff1d6;--bad:#b4232a;--badbg:#fde8e8;--shadow:0 1px 2px rgba(20,32,51,.06),0 4px 14px rgba(20,32,51,.05)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1520;--sf:#162131;--ink:#e8edf3;--mute:#93a1b3;--line:#263243;--brand:#0b1b30;--acc:#3fc1a3;--accbg:#12332d;--warn:#f0b04a;--warnbg:#3a2b0d;--bad:#ff8c90;--badbg:#3d1a1d;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--sf);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600;transition:.15s}
+button:hover{border-color:var(--acc)}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+button.p:hover{filter:brightness(1.08)}
+button.g{background:none;border-color:transparent;color:var(--mute);padding:6px 10px}
+button.d{color:var(--bad)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+[hidden]{display:none!important}
+.bar{background:var(--brand);color:#fff;position:sticky;top:0;z-index:5}
+.bar .in{max-width:1000px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo i{width:32px;height:32px;border-radius:9px;background:var(--acc);display:grid;place-items:center;font:700 16px Fraunces,serif;font-style:normal}
+.logo h1{font-size:19px}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;opacity:.95}
+.who span{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar button.g{color:#fff;opacity:.85}
+main{max-width:1000px;margin:0 auto;padding:18px 16px 90px}
+.note{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accbg);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+.note label{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
+.banner{background:var(--warnbg);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px}
+.banner b{color:var(--warn)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--sf);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font:600 26px Fraunces,serif;line-height:1.2}
+.stat span{color:var(--mute);font-size:13px}
+.stat.late b{color:var(--bad)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tools input[type=search]{flex:1 1 200px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--sf)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border-radius:99px;padding:6px 14px;font-size:14px}
+.chip[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--sf);border-radius:16px;padding:16px;box-shadow:var(--shadow);border-top:4px solid var(--acc);display:flex;flex-direction:column;gap:6px}
+.card.soon{border-top-color:var(--warn)}.card.late{border-top-color:var(--bad)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.pill{font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px;background:var(--accbg);color:var(--acc)}
+.pill.soon{background:var(--warnbg);color:var(--warn)}.pill.late{background:var(--badbg);color:var(--bad)}
+.card h3{font-size:19px}
+.meta{color:var(--mute);font-size:13px;margin:0}
+.amt{font:600 22px Fraunces,serif;margin-top:2px}
+.amt small{font:500 13px "Plus Jakarta Sans",sans-serif;color:var(--mute)}
+.dates{margin-top:6px;border-top:1px solid var(--line)}
+.d{display:grid;grid-template-columns:1fr auto;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.d span{color:var(--mute)}.d b{font-weight:600;text-align:right}
+.d i{grid-column:1/-1;font-style:normal;font-size:12px;color:var(--acc);font-weight:600}
+.d.soon i{color:var(--warn)}.d.late i{color:var(--bad)}
+.notes{font-size:13px;color:var(--mute);margin:2px 0 0}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+.acts button{padding:5px 11px;font-size:13px}
+.empty{text-align:center;color:var(--mute);padding:48px 12px;background:var(--sf);border-radius:16px;box-shadow:var(--shadow)}
+.empty h2{color:var(--ink);font-size:20px;margin-bottom:6px}
+.fab{position:fixed;right:18px;bottom:18px;z-index:6;border-radius:99px;padding:13px 22px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.auth{min-height:100vh;display:grid;place-items:center;padding:16px;background:linear-gradient(160deg,var(--brand),#24507f)}
+.ac{background:var(--sf);width:min(400px,100%);border-radius:20px;padding:26px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.ac h1{font-size:24px;margin:10px 0 4px}
+.ac .sub{color:var(--mute);margin:0 0 16px;font-size:14px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:14px}
+.seg button{border:none;background:none;border-radius:9px}
+.seg button[aria-selected=true]{background:var(--sf);box-shadow:var(--shadow)}
+.ac input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sf);margin-bottom:10px}
+.ac .p,.ac .gg{width:100%;padding:11px}
+.ac .gg{margin-top:10px}
+.lnk{background:none;border:none;color:var(--acc);padding:4px 0;font-size:13px}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin:4px 0}
+.ok{color:var(--acc)}
+dialog{border:none;border-radius:18px;width:min(520px,94vw);padding:20px;background:var(--sf);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,20,35,.55)}
+dialog h2{font-size:21px;margin-bottom:4px}
+dialog label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-top:12px}
+dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-top:4px;font-weight:400;color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.who span{display:none}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<section id="auth" class="auth" hidden>
+  <div class="ac">
+    <div class="logo" style="color:var(--ink)"><i style="color:#fff">P</i><span style="font-weight:700">Policy Tracker</span></div>
+    <h1 id="at">Welcome back</h1>
+    <p class="sub">Never miss a premium, renewal or expiry date.</p>
+    <div class="seg" role="tablist">
+      <button type="button" role="tab" id="tin" aria-selected="true">Sign in</button>
+      <button type="button" role="tab" id="tup" aria-selected="false">Create account</button>
+    </div>
+    <form id="af">
+      <input id="em" type="email" placeholder="Email" autocomplete="email" required aria-label="Email">
+      <input id="pw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" minlength="6" aria-label="Password">
+      <button class="p" id="go" type="submit">Sign in</button>
+    </form>
+    <button class="gg" id="google" type="button">Continue with Google</button>
+    <div class="err" id="autherr" role="alert"></div>
+    <button class="lnk" id="forgot" type="button">Forgot password?</button>
+  </div>
+</section>
+
+<div id="app" hidden>
+  <div class="bar"><div class="in">
+    <div class="logo"><i>P</i><h1>Policy Tracker</h1></div>
+    <div class="who"><span id="whoem"></span><button class="g" id="out">Sign out</button></div>
+  </div></div>
+  <main>
+    <div class="note" id="mailnote" hidden>
+      <span id="mailtxt"></span>
+      <label><input type="checkbox" id="mailtog" checked> Email reminders on</label>
+    </div>
+    <div id="banner"></div>
+    <div class="sum" id="sum"></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search name, provider or number" aria-label="Search">
+      <div class="chips" id="chips"></div>
+      <button class="g" id="ics" title="Download a calendar file with alarms">Calendar</button>
+      <button class="g" id="notif">Alerts</button>
+    </div>
+    <div class="grid" id="list"></div>
+  </main>
+  <button class="p fab" id="add">+ Add item</button>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="f">
+    <h2 id="dt">Add item</h2>
+    <label>Type
+      <select id="kind"><option value="insurance">Insurance</option><option value="policy">Policy (savings / life)</option><option value="document">Other document</option></select></label>
+    <label>Name <input id="name" required placeholder="e.g. Health insurance"></label>
+    <div class="two">
+      <label>Provider <input id="prov" placeholder="e.g. LIC, HDFC Ergo"></label>
+      <label>Policy / document no. <input id="num"></label>
+    </div>
+    <div data-k="insurance policy">
+      <div class="two">
+        <label>Premium (₹) <input id="prem" type="number" min="0" step="any"></label>
+        <label>Frequency
+          <select id="freq"><option value="1">Monthly</option><option value="3">Quarterly</option><option value="6">Half-yearly</option><option value="12" selected>Yearly</option><option value="0">One-time</option></select></label>
+      </div>
+      <label>Next premium due <input id="due" type="date"></label>
+    </div>
+    <div data-k="policy"><label>Maturity date <input id="mat" type="date"></label></div>
+    <div data-k="insurance document"><label>Expiry date <input id="exp" type="date"></label></div>
+    <label>Calendar and on-screen reminder, days before <input id="rem" type="number" min="0" value="15"></label>
+    <label>Notes <textarea id="notes" rows="2"></textarea></label>
+    <div class="err" id="ferr" role="alert"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button type="button" id="cancel">Cancel</button><button class="p" type="submit" id="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module">
+// Paste your Firebase web config here (Project settings > Your apps). Leave apiKey empty to try the app offline in this browser only.
+const FIREBASE = {
+  apiKey: "AIzaSyCxmZ_iNmyrv2hr6ZhsfEEAnI8yl8uoGrM",
+  authDomain: "policy-tracker-103ee.firebaseapp.com",
+  projectId: "policy-tracker-103ee",
+  storageBucket: "policy-tracker-103ee.firebasestorage.app",
+  messagingSenderId: "992881488493",
+  appId: "1:992881488493:web:5020021e941996681cc564"
+};
+
+const V = "10.12.2", G = `https://www.gstatic.com/firebasejs/${V}/`;
+const live = !!FIREBASE.apiKey;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr = n => "₹" + Number(n || 0).toLocaleString("en-IN");
+const today = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
+const left = d => Math.round((new Date(d + "T00:00") - today) / 864e5);
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const addMonths = (d, m) => { const x = new Date(d + "T00:00"); x.setMonth(x.getMonth() + m); return iso(x); };
+const fmt = d => new Date(d + "T00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+let items = [], editing = null, user = null, fb = {}, filter = "all", query = "", mode = "in";
+const KIND = { insurance: "Insurance", policy: "Policy", document: "Document" };
+const PER = { 1: "month", 3: "quarter", 6: "half-year", 12: "year", 0: "one-time" };
+
+// ---- storage layer: Firebase when configured, otherwise localStorage (single user, this browser only)
+let store;
+if (live) {
+  const [{ initializeApp }, A, F] = await Promise.all([
+    import(G + "firebase-app.js"), import(G + "firebase-auth.js"), import(G + "firebase-firestore.js")]);
+  const app = initializeApp(FIREBASE), auth = A.getAuth(app), db = F.getFirestore(app);
+  fb = { A, auth };
+  store = {
+    watch(cb) { return F.onSnapshot(F.collection(db, "users", user.uid, "items"), s => cb(s.docs.map(d => ({ ...d.data(), id: d.id })))); },
+    async put(it) { const id = it.id || crypto.randomUUID(); await F.setDoc(F.doc(db, "users", user.uid, "items", id), { ...it, id }); },
+    async del(it) { await F.deleteDoc(F.doc(db, "users", user.uid, "items", it.id)); },
+    async prefs() { const s = await F.getDoc(F.doc(db, "users", user.uid)); return s.exists() ? s.data() : {}; },
+    async setPrefs(p) { await F.setDoc(F.doc(db, "users", user.uid), p, { merge: true }); }
+  };
+} else {
+  const K = "tracker-items", read = () => JSON.parse(localStorage.getItem(K) || "[]");
+  let cb = () => {};
+  store = {
+    watch(c) { cb = c; c(read()); return () => {}; },
+    async put(it) { const all = read(), id = it.id || crypto.randomUUID(), i = all.findIndex(x => x.id === id); i < 0 ? all.push({ ...it, id }) : (all[i] = { ...it, id }); localStorage.setItem(K, JSON.stringify(all)); cb(all); },
+    async del(it) { const all = read().filter(x => x.id !== it.id); localStorage.setItem(K, JSON.stringify(all)); cb(all); },
+    async prefs() { return {}; }, async setPrefs() {}
+  };
+}
+
+// ---- dates and status
+const events = it => [
+  it.due && { k: "Premium due", d: it.due },
+  it.exp && { k: it.kind === "document" ? "Expires" : "Insurance expires", d: it.exp },
+  it.mat && { k: "Matures", d: it.mat }
+].filter(Boolean);
+const status = n => n < 0 ? "late" : n <= 30 ? "soon" : "";
+const words = n => n < 0 ? `${-n} day${n === -1 ? "" : "s"} overdue` : n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`;
+const nextOf = it => Math.min(...events(it).map(e => left(e.d)), 9e9);
+
+// ---- render
+function render() {
+  const dueSoon = items.filter(i => i.due && left(i.due) >= 0 && left(i.due) <= 30).reduce((s, i) => s + Number(i.prem || 0), 0);
+  const expiring = items.filter(i => [i.exp, i.mat].some(d => d && left(d) >= 0 && left(d) <= 60)).length;
+  const overdue = items.filter(i => events(i).some(e => left(e.d) < 0)).length;
+  $("sum").innerHTML = `<div class="stat"><b>${inr(dueSoon)}</b><span>premium due in the next 30 days</span></div><div class="stat"><b>${expiring}</b><span>expiring or maturing in 60 days</span></div><div class="stat ${overdue ? "late" : ""}"><b>${overdue}</b><span>past their date</span></div>`;
+
+  const alerts = items.flatMap(i => events(i).filter(e => left(e.d) <= Number(i.rem ?? 15)).map(e => `${esc(i.name)}: ${e.k.toLowerCase()} ${words(left(e.d))}`));
+  $("banner").innerHTML = alerts.length ? `<div class="banner" role="status"><b>Needs attention</b><br>${alerts.join("<br>")}</div>` : "";
+
+  const count = k => k === "all" ? items.length : items.filter(i => i.kind === k).length;
+  $("chips").innerHTML = [["all", "All"], ["insurance", "Insurance"], ["policy", "Policies"], ["document", "Documents"]]
+    .map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${filter === k}">${l} ${count(k)}</button>`).join("");
+
+  const q = query.trim().toLowerCase();
+  const shown = items.filter(i => (filter === "all" || i.kind === filter) && (!q || [i.name, i.provider, i.number].some(v => (v || "").toLowerCase().includes(q))))
+    .sort((a, b) => nextOf(a) - nextOf(b));
+
+  $("list").innerHTML = shown.length ? shown.map(it => {
+    const n = nextOf(it), st = status(n);
+    return `<article class="card ${st}">
+      <div class="top"><span class="tag">${KIND[it.kind] || "Item"}</span><span class="pill ${st}">${events(it).length ? words(n) : "No dates"}</span></div>
+      <h3>${esc(it.name)}</h3>
+      <p class="meta">${esc([it.provider, it.number].filter(Boolean).join(" • ")) || "&nbsp;"}</p>
+      ${it.prem ? `<div class="amt">${inr(it.prem)} <small>/ ${PER[it.freq] ?? "year"}</small></div>` : ""}
+      <div class="dates">${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}</b><i>${words(m)}</i></div>`; }).join("")}</div>
+      ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ""}
+      <div class="acts">
+        ${it.due && it.freq !== "0" ? `<button class="p" data-a="paid" data-id="${it.id}">Mark paid</button>` : ""}
+        <button data-a="edit" data-id="${it.id}">Edit</button>
+        <button class="d" data-a="del" data-id="${it.id}">Delete</button>
+      </div></article>`;
+  }).join("") : `<div class="empty" style="grid-column:1/-1"><h2>${items.length ? "No matches" : "Nothing tracked yet"}</h2>${items.length ? "Try a different search or filter." : "Add your first insurance, policy or document to start getting reminders."}</div>`;
+}
+
+$("list").onclick = async e => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const it = items.find(x => x.id === b.dataset.id);
+  if (b.dataset.a === "paid") await store.put({ ...it, due: addMonths(it.due, Number(it.freq)) });
+  if (b.dataset.a === "edit") openForm(it);
+  if (b.dataset.a === "del" && confirm(`Delete "${it.name}"?`)) await store.del(it);
+};
+$("chips").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { filter = b.dataset.f; render(); } };
+$("q").oninput = e => { query = e.target.value; render(); };
+
+// ---- form
+const F = ["kind", "name", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
+const map = { prov: "provider", num: "number" };
+const key = id => map[id] || id;
+const showKinds = () => document.querySelectorAll("[data-k]").forEach(el => el.hidden = !el.dataset.k.split(" ").includes($("kind").value));
+$("kind").onchange = showKinds;
+function openForm(it) {
+  editing = it || null;
+  $("dt").textContent = it ? "Edit item" : "Add item";
+  F.forEach(id => $(id).value = it ? (it[key(id)] ?? "") : id === "kind" ? "insurance" : id === "freq" ? "12" : id === "rem" ? "15" : "");
+  $("ferr").textContent = ""; showKinds(); $("dlg").showModal();
+}
+$("add").onclick = () => openForm();
+$("cancel").onclick = () => $("dlg").close();
+$("f").onsubmit = async e => {
+  e.preventDefault();
+  const it = { ...(editing || {}) };
+  F.forEach(id => it[key(id)] = $(id).value);
+  if (it.kind === "document") { it.prem = ""; it.due = ""; it.mat = ""; }
+  if (it.kind === "insurance") it.mat = "";
+  if (it.kind === "policy") it.exp = "";
+  $("save").disabled = true;
+  try { await store.put(it); $("dlg").close(); } catch (err) { $("ferr").textContent = "Could not save: " + err.message; }
+  $("save").disabled = false;
+};
+
+// ---- reminders: calendar file with alarms, plus browser alerts while the app is open
+$("ics").onclick = () => {
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Tracker//EN"];
+  const stamp = new Date().toISOString().replace(/[-:]|\.\d+/g, "");
+  items.forEach(it => events(it).forEach(e => L.push("BEGIN:VEVENT", `UID:${it.id}-${e.k.replace(/\W/g, "")}@tracker`, `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${e.d.replace(/-/g, "")}`, `SUMMARY:${it.name} - ${e.k}`, "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${it.name} - ${e.k}`, `TRIGGER:-P${Number(it.rem ?? 15)}D`, "END:VALARM", "END:VEVENT")));
+  L.push("END:VCALENDAR");
+  Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([L.join("\r\n")], { type: "text/calendar" })), download: "reminders.ics" }).click();
+};
+$("notif").onclick = async () => {
+  if ("Notification" in window && await Notification.requestPermission() === "granted")
+    items.forEach(it => events(it).forEach(e => { if (left(e.d) <= Number(it.rem ?? 15)) new Notification(it.name, { body: `${e.k} ${words(left(e.d))}` }); }));
+};
+
+// ---- auth and start
+let stop = () => {};
+async function start() {
+  $("auth").hidden = true; $("app").hidden = false;
+  $("whoem").textContent = live ? user.email : "Offline demo";
+  $("out").hidden = !live;
+  if (live) {
+    $("mailnote").hidden = false;
+    $("mailtxt").textContent = `Daily emails to ${user.email}, starting 5 days before each due, expiry or maturity date.`;
+    try { $("mailtog").checked = (await store.prefs()).emailReminders !== false; } catch {}
+  }
+  stop = store.watch(l => { items = l; render(); });
+}
+$("mailtog").onchange = e => store.setPrefs({ emailReminders: e.target.checked }).catch(() => {});
+
+const setMode = m => {
+  mode = m;
+  $("tin").setAttribute("aria-selected", m === "in"); $("tup").setAttribute("aria-selected", m === "up");
+  $("go").textContent = m === "in" ? "Sign in" : "Create account";
+  $("at").textContent = m === "in" ? "Welcome back" : "Create your account";
+  $("pw").autocomplete = m === "in" ? "current-password" : "new-password";
+  $("forgot").hidden = m !== "in"; $("autherr").textContent = "";
+};
+$("tin").onclick = () => setMode("in"); $("tup").onclick = () => setMode("up");
+
+if (live) {
+  const { A, auth } = fb;
+  const msg = e => ({ "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account. Try signing in.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email address doesn't look right.", "auth/too-many-requests": "Too many attempts. Try again in a few minutes." }[e.code] || e.message.replace("Firebase: ", ""));
+  const fail = e => { $("autherr").className = "err"; $("autherr").textContent = msg(e); };
+  $("af").onsubmit = e => { e.preventDefault(); (mode === "in" ? A.signInWithEmailAndPassword : A.createUserWithEmailAndPassword)(auth, $("em").value, $("pw").value).catch(fail); };
+  $("google").onclick = () => A.signInWithPopup(auth, new A.GoogleAuthProvider()).catch(fail);
+  $("forgot").onclick = () => {
+    if (!$("em").value) { $("autherr").className = "err"; $("autherr").textContent = "Enter your email above first."; return; }
+    A.sendPasswordResetEmail(auth, $("em").value).then(() => { $("autherr").className = "err ok"; $("autherr").textContent = "Password reset email sent. Check your inbox."; }).catch(fail);
+  };
+  $("out").onclick = () => A.signOut(auth);
+  A.onAuthStateChanged(auth, u => { user = u; stop(); items = []; if (u) start(); else { $("app").hidden = true; $("auth").hidden = false; } });
+} else start();
+</script>
+</body>
+</html>
