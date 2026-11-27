@@ -158,6 +158,7 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
       <label>Provider <input id="prov" placeholder="e.g. LIC, HDFC Ergo"></label>
       <label>Policy / document no. <input id="num"></label>
     </div>
+    <label>Start date <input id="start" type="date"></label>
     <div data-k="insurance policy">
       <label>Sum assured / total cover (₹) <input id="cover" type="number" min="0" step="any"></label>
       <div class="two">
@@ -266,7 +267,7 @@ function render() {
       ${it.holder ? `<p class="holder">Holder: ${esc(it.holder)}</p>` : ""}
       <p class="meta">${esc([it.provider, it.number].filter(Boolean).join(" • ")) || "&nbsp;"}</p>
       ${it.cover || it.prem ? `<div class="money">${it.cover ? `<div><small>Sum assured</small><div class="amt">${inr(it.cover)}</div></div>` : ""}${it.prem ? `<div><small>${it.freq === "0" ? "Premium (one-time)" : "Premium / " + (PER[it.freq] ?? "year")}</small><div class="amt">${inr(it.prem)}</div></div>` : ""}</div>` : ""}
-      <div class="dates">${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}</b><i>${words(m)}</i></div>`; }).join("")}</div>
+      <div class="dates">${it.start ? `<div class="d"><span>Start date</span><b>${fmt(it.start)}</b></div>` : ""}${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}</b><i>${words(m)}</i></div>`; }).join("")}</div>
       ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ""}
       <div class="acts">
         ${it.due && it.freq !== "0" ? `<button class="p" data-a="paid" data-id="${it.id}">Mark paid</button>` : ""}
@@ -289,7 +290,7 @@ $("chips").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { fil
 $("q").oninput = e => { query = e.target.value; render(); };
 
 // ---- form
-const F = ["kind", "name", "holder", "cover", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
+const F = ["kind", "name", "holder", "start", "cover", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
 const map = { prov: "provider", num: "number" };
 const key = id => map[id] || id;
 const showKinds = () => document.querySelectorAll("[data-k]").forEach(el => el.hidden = !el.dataset.k.split(" ").includes($("kind").value));
