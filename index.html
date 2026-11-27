@@ -28,12 +28,15 @@ button.d{color:var(--bad)}
 .logo{display:flex;align-items:center;gap:10px}
 .logo i{width:32px;height:32px;border-radius:9px;background:var(--acc);display:grid;place-items:center;font:700 16px Fraunces,serif;font-style:normal}
 .logo h1{font-size:19px}
-.who{display:flex;align-items:center;gap:8px;font-size:13px;opacity:.95}
-.who span{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar button.g{color:#fff;opacity:.85}
+.menu{position:relative}
+.menu summary{list-style:none;cursor:pointer;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:22px;line-height:1;background:rgba(255,255,255,.14)}
+.menu summary::-webkit-details-marker{display:none}
+.pop{position:absolute;right:0;top:46px;width:min(280px,86vw);background:var(--sf);color:var(--ink);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.4);padding:8px;display:flex;flex-direction:column;gap:2px}
+.pop .who{font-size:13px;color:var(--mute);padding:8px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop button{border:none;background:none;text-align:left;padding:10px;border-radius:8px}
+.pop button:hover,.pop .mt:hover{background:var(--bg)}
+.pop .mt{display:flex;align-items:center;gap:10px;padding:10px;font-weight:600;cursor:pointer;border-radius:8px}
 main{max-width:1000px;margin:0 auto;padding:18px 16px 90px}
-.note{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accbg);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:14px}
-.note label{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
 .banner{background:var(--warnbg);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px}
 .banner b{color:var(--warn)}
 .sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px}
@@ -64,7 +67,7 @@ main{max-width:1000px;margin:0 auto;padding:18px 16px 90px}
 .dates{margin-top:6px;border-top:1px solid var(--line)}
 .d{display:grid;grid-template-columns:1fr auto;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
 .d span{color:var(--mute)}.d b{font-weight:600;text-align:right}
-.d i{grid-column:1/-1;font-style:normal;font-size:12px;color:var(--acc);font-weight:600}
+.d i{font-style:normal;font-size:12px;color:var(--acc);font-weight:600;margin-left:8px;display:inline-block}
 .d.soon i{color:var(--warn)}.d.late i{color:var(--bad)}
 .notes{font-size:13px;color:var(--mute);margin:2px 0 0}
 .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
@@ -92,7 +95,28 @@ dialog h2{font-size:21px;margin-bottom:4px}
 dialog label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-top:12px}
 dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-top:4px;font-weight:400;color:var(--ink)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:520px){.who span{display:none}.two{grid-template-columns:1fr}}
+@media(max-width:600px){
+ .two{grid-template-columns:1fr}
+ main{padding:12px 12px 90px}
+ .bar .in{padding:10px 12px}
+ .logo h1{font-size:17px}
+ .sum{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+ .stat{padding:10px 12px;border-radius:12px}
+ .stat b{font-size:20px}
+ .stat span{font-size:12px;line-height:1.3;display:block}
+ .banner{padding:10px 12px;font-size:13px;margin-bottom:10px}
+ .tools{flex-direction:column;align-items:stretch;gap:8px;margin-bottom:12px}
+ .tools input[type=search]{flex:none;width:100%}
+ .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px}
+ .chips::-webkit-scrollbar{display:none}
+ .chip{white-space:nowrap;padding:6px 12px;font-size:13px;flex:none}
+ .grid{grid-template-columns:1fr;gap:10px}
+ .card{padding:14px;gap:4px;border-radius:14px}
+ .card h3{font-size:17px}
+ .money .amt{font-size:18px}
+ .acts{padding-top:6px}
+ .fab{right:14px;bottom:14px;padding:12px 18px}
+}
 </style>
 </head>
 <body>
@@ -121,20 +145,22 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
 <div id="app" hidden>
   <div class="bar"><div class="in">
     <div class="logo"><i>P</i><h1>Policy Tracker</h1></div>
-    <div class="who"><span id="whoem"></span><button class="g" id="out">Sign out</button></div>
+    <details class="menu" id="menu"><summary aria-label="Menu">&#8943;</summary>
+      <div class="pop">
+        <div class="who" id="whoem"></div>
+        <label class="mt" id="mailrow" hidden title="Daily emails start 5 days before each due, expiry or maturity date."><input type="checkbox" id="mailtog" checked> Daily email reminders</label>
+        <button id="ics" type="button">Add dates to calendar</button>
+        <button id="notif" type="button">Browser alerts</button>
+        <button id="out" type="button">Sign out</button>
+      </div>
+    </details>
   </div></div>
   <main>
-    <div class="note" id="mailnote" hidden>
-      <span id="mailtxt"></span>
-      <label><input type="checkbox" id="mailtog" checked> Email reminders on</label>
-    </div>
     <div id="banner"></div>
     <div class="sum" id="sum"></div>
     <div class="tools">
       <input type="search" id="q" placeholder="Search name, holder, provider or number" aria-label="Search">
       <div class="chips" id="chips"></div>
-      <button class="g" id="ics" title="Download a calendar file with alarms">Calendar</button>
-      <button class="g" id="notif">Alerts</button>
     </div>
     <div class="grid" id="list"></div>
   </main>
@@ -189,7 +215,6 @@ const FIREBASE = {
   messagingSenderId: "992881488493",
   appId: "1:992881488493:web:5020021e941996681cc564"
 };
-
 const V = "10.12.2", G = `https://www.gstatic.com/firebasejs/${V}/`;
 const live = !!FIREBASE.apiKey;
 const $ = id => document.getElementById(id);
@@ -246,7 +271,7 @@ function render() {
   const expiring = items.filter(i => [i.exp, i.mat].some(d => d && left(d) >= 0 && left(d) <= 60)).length;
   const overdue = items.filter(i => events(i).some(e => left(e.d) < 0)).length;
   const totalCover = items.reduce((s, i) => s + Number(i.cover || 0), 0);
-  $("sum").innerHTML = `<div class="stat"><b>${inr(totalCover)}</b><span>total sum assured</span></div><div class="stat"><b>${inr(dueSoon)}</b><span>premium due in the next 30 days</span></div><div class="stat"><b>${expiring}</b><span>expiring or maturing in 60 days</span></div><div class="stat ${overdue ? "late" : ""}"><b>${overdue}</b><span>past their date</span></div>`;
+  $("sum").innerHTML = `<div class="stat"><b>${inr(totalCover)}</b><span>total sum assured</span></div><div class="stat"><b>${inr(dueSoon)}</b><span>premium due in 30 days</span></div><div class="stat"><b>${expiring}</b><span>expiring in 60 days</span></div><div class="stat ${overdue ? "late" : ""}"><b>${overdue}</b><span>overdue</span></div>`;
 
   const alerts = items.flatMap(i => events(i).filter(e => left(e.d) <= Number(i.rem ?? 15)).map(e => `${esc(i.name)}: ${e.k.toLowerCase()} ${words(left(e.d))}`));
   $("banner").innerHTML = alerts.length ? `<div class="banner" role="status"><b>Needs attention</b><br>${alerts.join("<br>")}</div>` : "";
@@ -267,7 +292,7 @@ function render() {
       ${it.holder ? `<p class="holder">Holder: ${esc(it.holder)}</p>` : ""}
       <p class="meta">${esc([it.provider, it.number].filter(Boolean).join(" • ")) || "&nbsp;"}</p>
       ${it.cover || it.prem ? `<div class="money">${it.cover ? `<div><small>Sum assured</small><div class="amt">${inr(it.cover)}</div></div>` : ""}${it.prem ? `<div><small>${it.freq === "0" ? "Premium (one-time)" : "Premium / " + (PER[it.freq] ?? "year")}</small><div class="amt">${inr(it.prem)}</div></div>` : ""}</div>` : ""}
-      <div class="dates">${it.start ? `<div class="d"><span>Start date</span><b>${fmt(it.start)}</b></div>` : ""}${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}</b><i>${words(m)}</i></div>`; }).join("")}</div>
+      <div class="dates">${it.start ? `<div class="d"><span>Start date</span><b>${fmt(it.start)}</b></div>` : ""}${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}<i>${words(m)}</i></b></div>`; }).join("")}</div>
       ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ""}
       <div class="acts">
         ${it.due && it.freq !== "0" ? `<button class="p" data-a="paid" data-id="${it.id}">Mark paid</button>` : ""}
@@ -288,6 +313,8 @@ $("list").onclick = async e => {
 };
 $("chips").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { filter = b.dataset.f; render(); } };
 $("q").oninput = e => { query = e.target.value; render(); };
+$("menu").addEventListener("click", e => { if (e.target.closest(".pop button")) $("menu").open = false; });
+document.addEventListener("click", e => { if (!e.target.closest("#menu")) $("menu").open = false; });
 
 // ---- form
 const F = ["kind", "name", "holder", "start", "cover", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
@@ -352,8 +379,7 @@ async function start() {
   $("whoem").textContent = live ? user.email : "Offline demo";
   $("out").hidden = !live;
   if (live) {
-    $("mailnote").hidden = false;
-    $("mailtxt").textContent = `Daily emails to ${user.email}, starting 5 days before each due, expiry or maturity date.`;
+    $("mailrow").hidden = false;
     try { $("mailtog").checked = (await store.prefs()).emailReminders !== false; } catch {}
   }
   stop = store.watch(l => { items = l; render(); });
