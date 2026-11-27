@@ -54,6 +54,7 @@ main{max-width:1000px;margin:0 auto;padding:18px 16px 90px}
 .pill{font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px;background:var(--accbg);color:var(--acc)}
 .pill.soon{background:var(--warnbg);color:var(--warn)}.pill.late{background:var(--badbg);color:var(--bad)}
 .card h3{font-size:19px}
+.holder{font-size:13px;font-weight:600;margin:0}
 .meta{color:var(--mute);font-size:13px;margin:0}
 .amt{font:600 22px Fraunces,serif;margin-top:2px}
 .money{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
@@ -130,7 +131,7 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
     <div id="banner"></div>
     <div class="sum" id="sum"></div>
     <div class="tools">
-      <input type="search" id="q" placeholder="Search name, provider or number" aria-label="Search">
+      <input type="search" id="q" placeholder="Search name, holder, provider or number" aria-label="Search">
       <div class="chips" id="chips"></div>
       <button class="g" id="ics" title="Download a calendar file with alarms">Calendar</button>
       <button class="g" id="notif">Alerts</button>
@@ -152,6 +153,7 @@ dialog input,dialog select,dialog textarea{width:100%;padding:9px 10px;border:1p
     <label>Type
       <select id="kind"><option value="insurance">Insurance</option><option value="policy">Policy (savings / life)</option><option value="document">Other document</option></select></label>
     <label>Name <input id="name" required placeholder="e.g. Health insurance"></label>
+    <label>Policy holder name <input id="holder" placeholder="Full name of the policy holder"></label>
     <div class="two">
       <label>Provider <input id="prov" placeholder="e.g. LIC, HDFC Ergo"></label>
       <label>Policy / document no. <input id="num"></label>
@@ -253,7 +255,7 @@ function render() {
     .map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${filter === k}">${l} ${count(k)}</button>`).join("");
 
   const q = query.trim().toLowerCase();
-  const shown = items.filter(i => (filter === "all" || i.kind === filter) && (!q || [i.name, i.provider, i.number].some(v => (v || "").toLowerCase().includes(q))))
+  const shown = items.filter(i => (filter === "all" || i.kind === filter) && (!q || [i.name, i.holder, i.provider, i.number].some(v => (v || "").toLowerCase().includes(q))))
     .sort((a, b) => nextOf(a) - nextOf(b));
 
   $("list").innerHTML = shown.length ? shown.map(it => {
@@ -261,6 +263,7 @@ function render() {
     return `<article class="card ${st}">
       <div class="top"><span class="tag">${KIND[it.kind] || "Item"}</span><span class="pill ${st}">${events(it).length ? words(n) : "No dates"}</span></div>
       <h3>${esc(it.name)}</h3>
+      ${it.holder ? `<p class="holder">Holder: ${esc(it.holder)}</p>` : ""}
       <p class="meta">${esc([it.provider, it.number].filter(Boolean).join(" • ")) || "&nbsp;"}</p>
       ${it.cover || it.prem ? `<div class="money">${it.cover ? `<div><small>Sum assured</small><div class="amt">${inr(it.cover)}</div></div>` : ""}${it.prem ? `<div><small>${it.freq === "0" ? "Premium (one-time)" : "Premium / " + (PER[it.freq] ?? "year")}</small><div class="amt">${inr(it.prem)}</div></div>` : ""}</div>` : ""}
       <div class="dates">${events(it).map(e => { const m = left(e.d); return `<div class="d ${status(m)}"><span>${e.k}</span><b>${fmt(e.d)}</b><i>${words(m)}</i></div>`; }).join("")}</div>
@@ -286,7 +289,7 @@ $("chips").onclick = e => { const b = e.target.closest("[data-f]"); if (b) { fil
 $("q").oninput = e => { query = e.target.value; render(); };
 
 // ---- form
-const F = ["kind", "name", "cover", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
+const F = ["kind", "name", "holder", "cover", "prov", "num", "prem", "freq", "due", "mat", "exp", "rem", "notes"];
 const map = { prov: "provider", num: "number" };
 const key = id => map[id] || id;
 const showKinds = () => document.querySelectorAll("[data-k]").forEach(el => el.hidden = !el.dataset.k.split(" ").includes($("kind").value));
